@@ -1,22 +1,62 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, Menu, X, User, Settings, LogOut, BookOpen, BarChart3 } from 'lucide-react';
+import { 
+  GraduationCap, 
+  Menu, 
+  X, 
+  User, 
+  Settings, 
+  LogOut, 
+  BookOpen, 
+  ChevronDown,
+  LayoutDashboard,
+  Bookmark,
+  Award
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    setIsUserMenuOpen(false);
+    navigate('/');
   };
 
   const isActive = (path: string) => location.pathname === path;
+  
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
+  
+  const navLinkClasses = (path: string) => 
+    `text-sm font-medium transition-colors hover:text-primary ${
+      isActive(path) ? 'text-primary' : 'text-foreground/80'
+    }`;
+    
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <motion.header 
@@ -43,22 +83,25 @@ export const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-6">
             <Link 
               to="/courses" 
-              className={`nav-link ${isActive('/courses') ? 'active' : ''}`}
+              className={navLinkClasses('/courses')}
+              onClick={closeMobileMenu}
             >
               Courses
             </Link>
             <Link 
               to="/about" 
-              className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+              className={navLinkClasses('/about')}
+              onClick={closeMobileMenu}
             >
               About
             </Link>
             <Link 
               to="/contact" 
-              className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
+              className={navLinkClasses('/contact')}
+              onClick={closeMobileMenu}
             >
               Contact
             </Link>
@@ -70,103 +113,87 @@ export const Header: React.FC = () => {
             
             <div className="hidden md:flex items-center gap-4">
               {isAuthenticated && user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-secondary transition-colors"
-                  >
-                    {user.avatarUrl ? (
-                      <img 
-                        src={user.avatarUrl} 
-                        alt={user.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                        <User size={16} className="text-white" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-auto px-3">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatarUrl} alt={user.name} />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {getUserInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user.name}</span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
                       </div>
-                    )}
-                    <span className="text-caption font-medium text-text-primary">
-                      {user.name}
-                    </span>
-                  </button>
-
-                  <AnimatePresence>
-                    {isUserMenuOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute right-0 top-12 w-56 glass-card py-2 shadow-xl z-50"
-                      >
-                        <div className="px-4 py-3 border-b border-border-primary">
-                          <p className="text-caption font-medium text-text-primary">{user.name}</p>
-                          <p className="text-small text-text-muted">{user.email}</p>
-                          <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-md capitalize">
-                            {user.role}
-                          </span>
-                        </div>
-                        
-                        <div className="py-1">
-                          <Link 
-                            to="/dashboard" 
-                            className="flex items-center gap-3 px-4 py-2 text-caption text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <BarChart3 size={16} />
-                            Dashboard
-                          </Link>
-                          <Link 
-                            to="/my-courses" 
-                            className="flex items-center gap-3 px-4 py-2 text-caption text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <BookOpen size={16} />
-                            My Courses
-                          </Link>
-                          <Link 
-                            to="/settings" 
-                            className="flex items-center gap-3 px-4 py-2 text-caption text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <Settings size={16} />
-                            Settings
-                          </Link>
-                        </div>
-                        
-                        <div className="border-t border-border-primary pt-1">
-                          <button 
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 w-full px-4 py-2 text-caption text-error hover:bg-bg-secondary transition-colors"
-                          >
-                            <LogOut size={16} />
-                            Sign Out
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard" className="w-full cursor-pointer">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          <span>Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/my-courses" className="w-full cursor-pointer">
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          <span>My Courses</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/bookmarks" className="w-full cursor-pointer">
+                          <Bookmark className="mr-2 h-4 w-4" />
+                          <span>Bookmarks</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="w-full cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <>
-                  <Link to="/login" className="btn-ghost hidden sm:inline-flex">
-                    Sign In
-                  </Link>
-                  <Link to="/register" className="btn-primary hidden sm:inline-flex">
-                    Get Started
-                  </Link>
-                </>
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" asChild>
+                    <Link to="/login">Sign in</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/register">Sign up</Link>
+                  </Button>
+                </div>
               )}
             </div>
-
-            {/* Mobile menu button - Always visible on mobile */}
+            
+            {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-bg-secondary rounded-lg transition-colors relative z-50"
+              className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
               aria-label="Toggle menu"
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -192,42 +219,83 @@ export const Header: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <Link 
                   to="/courses" 
-                  className={`nav-link ${isActive('/courses') ? 'active' : ''}`}
+                  className={navLinkClasses('/courses')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Courses
                 </Link>
                 <Link 
                   to="/about" 
-                  className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+                  className={navLinkClasses('/about')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link 
                   to="/contact" 
-                  className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
+                  className={navLinkClasses('/contact')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Contact
                 </Link>
                 
-                {!isAuthenticated && (
-                  <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border-primary">
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border">
                     <Link 
-                      to="/login" 
-                      className="btn-ghost w-full text-center"
+                      to="/dashboard" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-accent"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Sign In
+                      <LayoutDashboard size={16} />
+                      Dashboard
                     </Link>
                     <Link 
-                      to="/register" 
-                      className="btn-primary w-full text-center"
+                      to="/my-courses" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-accent"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Get Started
+                      <BookOpen size={16} />
+                      My Courses
                     </Link>
+                    <Link 
+                      to="/settings" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-accent"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Settings size={16} />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm rounded-md text-destructive hover:bg-destructive/10"
+                    >
+                      <LogOut size={16} />
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-border">
+                    <Button variant="outline" asChild>
+                      <Link 
+                        to="/login" 
+                        className="w-full"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button asChild>
+                      <Link 
+                        to="/register" 
+                        className="w-full"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Get Started
+                      </Link>
+                    </Button>
                   </div>
                 )}
               </div>
