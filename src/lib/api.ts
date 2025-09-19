@@ -3,7 +3,7 @@ import { ApiResponse, AuthResponse, LoginCredentials, RegisterData, Course, User
 import toast from 'react-hot-toast';
 
 // Base URL for the LMS backend API
-const BASE_URL = 'https://lms-express.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class ApiClient {
   private client: AxiosInstance;
@@ -96,8 +96,20 @@ class ApiClient {
   }
 
   // Course endpoints
-  async getCourses(params?: { published?: boolean; category?: string; search?: string; limit?: number }): Promise<Course[]> {
-    const response = await this.client.get<ApiResponse<Course[]>>('/courses', { params });
+  async getCourses(params?: { 
+    published?: boolean; 
+    category?: string; 
+    instructorId?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: Course[]; total: number; page: number; totalPages: number }> {
+    const response = await this.client.get<ApiResponse<{
+      data: Course[];
+      total: number;
+      page: number;
+      totalPages: number;
+    }>>('/courses', { params });
+    
     return response.data.data;
   }
 
