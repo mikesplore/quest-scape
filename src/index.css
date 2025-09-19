@@ -109,6 +109,10 @@
 
 /* Typography Scale */
 @layer base {
+  html, body {
+    @apply w-full overflow-x-hidden;
+  }
+  
   * {
     @apply border-border;
   }
