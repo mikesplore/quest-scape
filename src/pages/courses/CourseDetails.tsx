@@ -83,33 +83,38 @@ const CourseDetails = () => {
 
         const courseData = await courseRes.json();
         const lessonsData = await lessonsRes.json();
-
-        // Use instructor data from course response
-        const instructorData = courseData.data.instructor;
+        
+        console.log('Course API Response:', courseData); // Debug log
 
         // Transform and set the data
+        // The API returns the course data inside a `data` property
+        const courseDetails = courseData.data || courseData;
+        
+        // Use instructor data from course response
+        const instructorData = courseDetails.instructor;
+        
         setCourse({
-          id: courseData.id,
-          title: courseData.title,
-          subtitle: courseData.subtitle || '',
-          description: courseData.description,
-          thumbnail: courseData.thumbnail || 'https://via.placeholder.com/800x400',
-          price: courseData.price || 0,
-          isFree: courseData.isFree || false,
-          level: courseData.level || 'beginner',
-          category: courseData.category || 'Uncategorized',
-          duration: courseData.duration || 0,
-          studentsEnrolled: courseData.enrollmentCount || 0,
-          averageRating: courseData.averageRating || 0,
-          totalLessons: courseData.lessonCount || 0,
+          id: courseDetails.id,
+          title: courseDetails.title,
+          subtitle: courseDetails.subtitle || '',
+          description: courseDetails.description,
+          thumbnail: courseDetails.thumbnail || 'https://via.placeholder.com/800x400',
+          price: courseDetails.price || 0,
+          isFree: courseDetails.isFree || false,
+          level: courseDetails.level || 'beginner',
+          category: courseDetails.category || 'Uncategorized',
+          duration: courseDetails.duration || 0,
+          studentsEnrolled: courseDetails.enrollmentCount || courseDetails.studentsEnrolled || 0,
+          averageRating: courseDetails.averageRating || 0,
+          totalLessons: courseDetails.lessonCount || courseDetails.totalLessons || 0,
           instructor: {
             id: instructorData.id,
             name: instructorData.name,
             avatar: instructorData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(instructorData.name)}`,
             bio: instructorData.bio || 'No bio available'
           },
-          learningObjectives: courseData.learningObjectives || [],
-          requirements: courseData.requirements || []
+          learningObjectives: courseDetails.learningObjectives || [],
+          requirements: courseDetails.requirements || []
         });
 
         // Transform and set lessons
@@ -260,7 +265,7 @@ const CourseDetails = () => {
               <Card className="sticky top-24">
                 <CardHeader>
                   <CardTitle className="text-2xl">
-                    {course.isFree ? 'Free' : `$Ksh.{course.price.toFixed(2)}`}
+                    {course.isFree ? 'Free' : `Ksh.${course.price.toFixed(2)}`}
                   </CardTitle>
                   <CardDescription>One-time payment, lifetime access</CardDescription>
                 </CardHeader>
