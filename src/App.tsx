@@ -3,10 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { Toaster as HotToast } from 'react-hot-toast';
 
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth, UserRole } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Header } from '@/components/Header';
 
@@ -16,10 +16,22 @@ import NotFound from "./pages/NotFound";
 import CourseCatalog from "./pages/courses/CourseCatalog";
 import CourseDetails from "./pages/courses/CourseDetails";
 import { LoginPage, RegisterPage } from './pages/auth';
+import { DashboardPage, MyCoursesPage } from './pages/student';
 
-// Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+// Protected Route Component with Role-based Access Control
+const ProtectedRoute = ({ 
+  children, 
+  allowedRoles = [],
+  ownerOnly = false,
+  userId = ''
+}: { 
+  children: React.ReactNode;
+  allowedRoles?: UserRole[];
+  ownerOnly?: boolean;
+  userId?: string;
+}) => {
+  const { isAuthenticated, isLoading, user, hasRole, isOwner } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -30,7 +42,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: window.location.pathname }} replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  // Check if route has role restrictions and if user has required role
+  if (allowedRoles.length > 0 && !hasRole(allowedRoles)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // Check if route is owner-only and if user is the owner
+  if (ownerOnly && userId && !isOwner(userId)) {
+    return <Navigate to="/forbidden" replace />;
   }
 
   return <>{children}</>;
@@ -83,13 +105,26 @@ const App = () => (
                     </PublicOnlyRoute>
                   } />
                   
-                  {/* Protected Routes Example:
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <Dashboard />
+                  {/* Protected Routes */}
+                  <Route path="/:userId/dashboard" element={
+                    <ProtectedRoute 
+                      allowedRoles={['student']}
+                      ownerOnly={true}
+                      userId={useParams().userId}
+                    >
+                      <DashboardPage />
                     </ProtectedRoute>
-                  } /> 
-                  */}
+                  } />
+                  
+                  <Route path="/:userId/my-courses" element={
+                    <ProtectedRoute 
+                      allowedRoles={['student']}
+                      ownerOnly={true}
+                      userId={useParams().userId}
+                    >
+                      <MyCoursesPage />
+                    </ProtectedRoute>
+                  } />
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
