@@ -260,7 +260,7 @@ const CourseDetails = () => {
               <Card className="sticky top-24">
                 <CardHeader>
                   <CardTitle className="text-2xl">
-                    {course.isFree ? 'Free' : `$${course.price.toFixed(2)}`}
+                    {course.isFree ? 'Free' : `$Ksh.{course.price.toFixed(2)}`}
                   </CardTitle>
                   <CardDescription>One-time payment, lifetime access</CardDescription>
                 </CardHeader>

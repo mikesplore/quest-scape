@@ -3,6 +3,9 @@ import { User, AuthResponse, LoginCredentials, RegisterData } from '@/types/api'
 import { apiClient } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+// Role type for type safety
+export type UserRole = 'student' | 'instructor' | 'admin';
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -11,6 +14,10 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  hasRole: (roles: UserRole | UserRole[]) => boolean;
+  isOwner: (userId: string) => boolean;
+  hasAnyRole: (roles: UserRole[]) => boolean;
+  hasAllRoles: (roles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,6 +114,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Check if user has specific role(s)
+  const hasRole = (roles: UserRole | UserRole[]): boolean => {
+    if (!user) return false;
+    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+    return rolesToCheck.includes(user.role);
+  };
+
+  // Check if current user is the owner of a resource
+  const isOwner = (userId: string): boolean => {
+    return user?.id === userId;
+  };
+
+  // Check if user has any of the specified roles
+  const hasAnyRole = (roles: UserRole[]): boolean => {
+    if (!user) return false;
+    return roles.some(role => user.role === role);
+  };
+
+  // Check if user has all of the specified roles (useful for multi-role requirements)
+  const hasAllRoles = (roles: UserRole[]): boolean => {
+    if (!user) return false;
+    return roles.every(role => user.role === role);
+  };
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -115,6 +146,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     refreshUser,
+    hasRole,
+    isOwner,
+    hasAnyRole,
+    hasAllRoles,
   };
 
   return (

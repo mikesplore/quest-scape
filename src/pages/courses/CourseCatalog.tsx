@@ -22,9 +22,9 @@ const PRICE_RANGES = [
   { label: 'All Prices', value: 'all' },
   { label: 'Free', value: 'free' },
   { label: 'Paid', value: 'paid' },
-  { label: '$0 - $50', value: '0-50' },
-  { label: '$50 - $100', value: '50-100' },
-  { label: '$100+', value: '100+' },
+  { label: 'Ksh.0 - Ksh.50', value: '0-50' },
+  { label: 'Ksh.50 - Ksh.100', value: '50-100' },
+  { label: 'Ksh.100+', value: '100+' },
 ];
 
 const LEVELS = [

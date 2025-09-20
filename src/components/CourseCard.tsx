@@ -46,7 +46,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, index = 0 }) => 
         {/* Price badge */}
         <div className="absolute top-4 right-4">
           <span className="bg-white/90 backdrop-blur-sm text-text-primary px-3 py-1 rounded-full text-small font-bold shadow-lg">
-            ${course.price}
+            Ksh.{course.price}
           </span>
         </div>
 

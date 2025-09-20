@@ -140,13 +140,13 @@ export const Header: React.FC = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem asChild>
-                        <Link to="/dashboard" className="w-full cursor-pointer">
+                        <Link to={`/${user?.id}/dashboard`} className="w-full cursor-pointer">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           <span>Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/my-courses" className="w-full cursor-pointer">
+                        <Link to={`/${user?.id}/my-courses`} className="w-full cursor-pointer">
                           <BookOpen className="mr-2 h-4 w-4" />
                           <span>My Courses</span>
                         </Link>
