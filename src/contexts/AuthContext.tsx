@@ -58,8 +58,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authData: AuthResponse = await apiClient.login(credentials);
       
       // Store tokens and user data
-      localStorage.setItem('accessToken', authData.accessToken);
-      localStorage.setItem('refreshToken', authData.refreshToken);
+      localStorage.setItem('accessToken', authData.tokens.accessToken);
+      localStorage.setItem('refreshToken', authData.tokens.refreshToken);
       localStorage.setItem('user', JSON.stringify(authData.user));
       
       setUser(authData.user);
@@ -79,8 +79,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authData: AuthResponse = await apiClient.register(userData);
       
       // Store tokens and user data
-      localStorage.setItem('accessToken', authData.accessToken);
-      localStorage.setItem('refreshToken', authData.refreshToken);
+      localStorage.setItem('accessToken', authData.tokens.accessToken);
+      localStorage.setItem('refreshToken', authData.tokens.refreshToken);
       localStorage.setItem('user', JSON.stringify(authData.user));
       
       setUser(authData.user);
