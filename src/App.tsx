@@ -13,8 +13,13 @@ import { Header } from '@/components/Header';
 // Pages
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import SettingsPage from "./pages/SettingsPage";
+import BookmarksPage from "./pages/BookmarksPage";
 import CourseCatalog from "./pages/courses/CourseCatalog";
 import CourseDetails from "./pages/courses/CourseDetails";
+import CourseLearningPage from "./pages/courses/CourseLearningPage";
 import { LoginPage, RegisterPage } from './pages/auth';
 import { DashboardPage, MyCoursesPage } from './pages/student';
 
@@ -90,6 +95,8 @@ const App = () => (
               <main>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
                   <Route path="/courses" element={<CourseCatalog />} />
                   <Route path="/courses/:id" element={<CourseDetails />} />
                   
@@ -123,6 +130,24 @@ const App = () => (
                       userId={useParams().userId}
                     >
                       <MyCoursesPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/bookmarks" element={
+                    <ProtectedRoute>
+                      <BookmarksPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/courses/:courseId/learn" element={
+                    <ProtectedRoute>
+                      <CourseLearningPage />
                     </ProtectedRoute>
                   } />
                   

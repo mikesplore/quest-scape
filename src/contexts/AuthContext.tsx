@@ -58,14 +58,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authData: AuthResponse = await apiClient.login(credentials);
       
       // Store tokens and user data
-      localStorage.setItem('accessToken', authData.tokens.accessToken);
-      localStorage.setItem('refreshToken', authData.tokens.refreshToken);
+      localStorage.setItem('accessToken', authData.accessToken);
+      localStorage.setItem('refreshToken', authData.refreshToken);
       localStorage.setItem('user', JSON.stringify(authData.user));
       
       setUser(authData.user);
       toast.success(`Welcome back, ${authData.user.name}!`);
     } catch (error: any) {
-      const message = error.response?.data?.error || 'Login failed. Please try again.';
+      // Handle error object which might have message and code properties
+      const errorData = error.response?.data?.error;
+      const message = typeof errorData === 'string' 
+        ? errorData 
+        : errorData?.message || error.response?.data?.message || 'Login failed. Please try again.';
       toast.error(message);
       throw error;
     } finally {
@@ -79,14 +83,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authData: AuthResponse = await apiClient.register(userData);
       
       // Store tokens and user data
-      localStorage.setItem('accessToken', authData.tokens.accessToken);
-      localStorage.setItem('refreshToken', authData.tokens.refreshToken);
+      localStorage.setItem('accessToken', authData.accessToken);
+      localStorage.setItem('refreshToken', authData.refreshToken);
       localStorage.setItem('user', JSON.stringify(authData.user));
       
       setUser(authData.user);
       toast.success(`Welcome to LearnHub, ${authData.user.name}!`);
     } catch (error: any) {
-      const message = error.response?.data?.error || 'Registration failed. Please try again.';
+      // Handle error object which might have message and code properties
+      const errorData = error.response?.data?.error;
+      const message = typeof errorData === 'string' 
+        ? errorData 
+        : errorData?.message || error.response?.data?.message || 'Registration failed. Please try again.';
       toast.error(message);
       throw error;
     } finally {

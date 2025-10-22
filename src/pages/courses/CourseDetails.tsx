@@ -165,6 +165,9 @@ const CourseDetails = () => {
             enrollment: response.data.data
           });
           toast.success('Successfully enrolled in the course!');
+          
+          // Redirect to course learning page
+          navigate(`/courses/${id}/learn`);
         } else {
           throw new Error(response.data.error?.message || 'Failed to enroll');
         }
@@ -206,13 +209,8 @@ const CourseDetails = () => {
         
         toast.success('Successfully enrolled in the course!');
         
-        // Redirect to the first lesson or course content
-        const firstLesson = lessons[0];
-        if (firstLesson) {
-          navigate(`/learning/courses/${id}/lessons/${firstLesson.id}`);
-        } else {
-          navigate(`/learning/courses/${id}`);
-        }
+        // Redirect to course learning page
+        navigate(`/courses/${id}/learn`);
       } else {
         throw new Error(response.data.message || 'Failed to enroll in course');
       }
@@ -234,13 +232,8 @@ const CourseDetails = () => {
       });
       toast.success('Payment successful! You are now enrolled in the course.');
       
-      // Redirect to the first lesson or course content
-      const firstLesson = lessons[0];
-      if (firstLesson) {
-        navigate(`/learning/courses/${id}/lessons/${firstLesson.id}`);
-      } else {
-        navigate(`/learning/courses/${id}`);
-      }
+      // Redirect to course learning page
+      navigate(`/courses/${id}/learn`);
     }
   };
 
@@ -248,24 +241,36 @@ const CourseDetails = () => {
     toast.error(errorMessage || 'Payment failed. Please try again.');
   };
 
-  const verifyPayment = async (reference: string) => {
+  const verifyPayment = async (reference: string): Promise<{ status: string; enrollment: any; message?: string; }> => {
     try {
       const result = await api.get(`/payments/verify?reference=${reference}`);
       if (result.data.success) {
-        handlePaymentSuccess(result.data.data);
+        const enrollmentData = result.data.data;
+        handlePaymentSuccess(enrollmentData);
         
         // Clean up URL
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
         toast.success('Payment verified! You are now enrolled in the course.');
-        return true;
+        
+        return {
+          status: 'success',
+          enrollment: enrollmentData,
+          message: 'Payment verified successfully'
+        };
       } else {
         throw new Error(result.data.message || 'Payment verification failed');
       }
     } catch (error: any) {
       console.error('Payment verification error:', error);
-      toast.error(error.response?.data?.message || 'Failed to verify payment');
-      return false;
+      const errorMessage = error.response?.data?.message || 'Failed to verify payment';
+      toast.error(errorMessage);
+      
+      return {
+        status: 'failed',
+        enrollment: null,
+        message: errorMessage
+      };
     }
   };
 
@@ -442,7 +447,7 @@ const CourseDetails = () => {
                       <Button 
                         className="w-full bg-green-600 hover:bg-green-700" 
                         size="lg"
-                        onClick={() => navigate(`/learn/${id}`)}
+                        onClick={() => navigate(`/courses/${id}/learn`)}
                       >
                         <CheckCircle className="w-5 h-5 mr-2" />
                         Go to Course
